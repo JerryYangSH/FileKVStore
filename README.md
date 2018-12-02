@@ -1,5 +1,5 @@
 FileKVStore: File Based Key-Value Store
-d
+
 -----------------------------------
 
 ### What is it?
