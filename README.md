@@ -15,12 +15,13 @@ FileKVStore is a file based KV Store that provides fast query service. Given a s
 where typically key size < 1 KB,value size < 1 MB.
 
 ### Design
-The key part is to build index on bootstrap and provide query service on demand.  No concurrent writed is allowed. Design target is main for fast concurrent read.
+The key part is to build index on bootstrap and provide query service on demand.  No concurrent write is allowed. Design target is main for fast concurrent read.
 1. Hash is real good fit for fast query. So Hash Index is implemented. And 3-Level hashing is implemented to reduce hash collisions. An index file is for one or more keys.
 The index meta directory will be LVL1_x/LVL2_y/IDX_z.  where x = hash1(key) % BUCKET_NUM, y = hash2(key) % BUCKET_NUM, z = hash3(key) % BUCKET_NUM.
 For now we have 4096 BUCKET_NUM, that means we support 4096 * 4096 * 4096 or more concurrent indexing.
-2. LRU Cache for Index.  Value size could big as 1 MB, so we will so cache Value. An concurrent Cache is implemented by sharding segments. So concurrent read requests may not block each other most time.
-3. Basically it needs just two disk reads to load a value, one is for index and the other is for data value.  Idealy on cache hit, index loading is saved and only single IO on disk is needed. This will be good for read performance. Ofcourse, Caching hit rate really depends on IO patten and Cache memory. For sequential IO, it's better to preread to improve the caching performance.
+2. LRU Cache for Index.  Value size could big as 1 MB, it's not efficient to cache Value. so we will so cache Index only. 
+3. An concurrent Cache is implemented by sharding segments. So concurrent read requests may not block each other most time.
+4. Basically it needs just two disk reads to load a value, one is for index and the other is for data value.  Idealy on cache hit, index loading is saved and only single IO on disk is needed. This will be good for read performance. Ofcourse, Caching hit rate really depends on IO patten and Cache memory. For sequential IO, it's better to preread to improve the caching performance.
 
 ### Build Notes
 Just Run 'source BuildMe'
@@ -57,7 +58,7 @@ Successfully build index
 
 ### Dependencies
 
-FileKVStore requires gcc 4.8+ with C++11 support.
+FileKVStore requires gcc 4.8.5+ with C++11 support.
 
 googletest is required to build and run the tests under test.
 
